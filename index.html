@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Sticky Wall</title>
 
-  <!-- UI font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=Margarine&display=swap" rel="stylesheet">
@@ -16,11 +15,17 @@
   <main id="wall">
     <div id="notesLayer"></div>
 
-    <!-- Color picker -->
-    <div id="picker" class="picker hidden" role="dialog" aria-label="Pick a Color">
-      <div id="pickerPreview" class="pickerPreview"></div>
+    <!-- Status / errors (no DevTools needed) -->
+    <div id="status" class="status hidden"></div>
 
-      <div class="pickerTitle">Pick a Color</div>
+    <!-- Picker / Composer -->
+    <div id="composer" class="composer hidden" role="dialog" aria-label="New Sticky">
+      <div id="preview" class="preview"></div>
+
+      <div class="composerHeader">
+        <div class="composerTitle">New Sticky</div>
+        <button id="closeComposer" class="iconBtn" aria-label="Close">✕</button>
+      </div>
 
       <div class="chips">
         <button class="chip" data-color="yellow" aria-label="Yellow"></button>
@@ -30,16 +35,16 @@
         <button class="chip" data-color="gray" aria-label="Gray"></button>
       </div>
 
-      <div class="pickerFooter">
+      <div class="composerFooter">
         <div id="charCount" class="charCount">0 / 160</div>
         <button id="postBtn" class="postBtn" disabled>Post</button>
       </div>
     </div>
 
-    <!-- New sticky button -->
+    <!-- New Sticky button -->
     <button id="newStickyBtn" class="fab" aria-label="New Sticky">
       <span class="fabPlus">+</span>
-      <span class="fabLabel">Create new sticky</span>
+      <span class="fabLabel">New Sticky</span>
     </button>
   </main>
 
