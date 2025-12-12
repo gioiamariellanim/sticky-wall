@@ -1,16 +1,47 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-  <title>Sticky Wall Live</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Sticky Wall</title>
 
-  <link href="https://fonts.googleapis.com/css2?family=Margarine&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <!-- UI font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=Margarine&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
 </head>
-
 <body>
-  <div id="wall"></div>
+  <main id="wall">
+    <div id="notesLayer"></div>
 
-  <button id="new">New Sticky</button>
+    <!-- Color picker -->
+    <div id="picker" class="picker hidden" role="dialog" aria-label="Pick a Color">
+      <div id="pickerPreview" class="pickerPreview"></div>
+
+      <div class="pickerTitle">Pick a Color</div>
+
+      <div class="chips">
+        <button class="chip" data-color="yellow" aria-label="Yellow"></button>
+        <button class="chip" data-color="blue" aria-label="Blue"></button>
+        <button class="chip" data-color="green" aria-label="Green"></button>
+        <button class="chip" data-color="pink" aria-label="Pink"></button>
+        <button class="chip" data-color="gray" aria-label="Gray"></button>
+      </div>
+
+      <div class="pickerFooter">
+        <div id="charCount" class="charCount">0 / 160</div>
+        <button id="postBtn" class="postBtn" disabled>Post</button>
+      </div>
+    </div>
+
+    <!-- New sticky button -->
+    <button id="newStickyBtn" class="fab" aria-label="New Sticky">
+      <span class="fabPlus">+</span>
+      <span class="fabLabel">New Sticky</span>
+    </button>
+  </main>
 
   <script src="app.js"></script>
 </body>
