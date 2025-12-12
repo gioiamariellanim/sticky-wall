@@ -1,19 +1,40 @@
+// ✅ Paste your Apps Script /exec URL here:
 const API = "https://script.google.com/macros/s/AKfycbzUFPOqlRbtS-uExuoM6XsZ7KuDQ70t8y-6OKbnKAuvl6747WdPhtNUCYrtZeN4NKZE6Q/exec";
 
 const GRID = 20;
 const STICKY = 151;
+const MAX_CHARS = 160;
+
+const BG = (color) => `./assets/sticky-${color}.svg`;
 
 const notesLayer = document.getElementById("notesLayer");
 const newBtn = document.getElementById("newStickyBtn");
 
-const picker = document.getElementById("picker");
-const pickerPreview = document.getElementById("pickerPreview");
+const statusEl = document.getElementById("status");
+
+const composer = document.getElementById("composer");
+const preview = document.getElementById("preview");
 const postBtn = document.getElementById("postBtn");
 const charCount = document.getElementById("charCount");
+const closeComposer = document.getElementById("closeComposer");
 
-const BG = (color) => `./assets/sticky-${color}.svg`;
+let draft = null; // { el, ta, x, y, color, id }
 
-let draft = null; // { el, ta, x, y, color }
+// ---------- UI helpers ----------
+function showStatus(msg, ms = 3000){
+  statusEl.textContent = msg;
+  statusEl.classList.remove("hidden");
+  if (ms > 0) setTimeout(() => statusEl.classList.add("hidden"), ms);
+}
+function hideStatus(){ statusEl.classList.add("hidden"); }
+
+function openComposer(color="yellow"){
+  preview.style.backgroundImage = `url("${BG(color)}")`;
+  composer.classList.remove("hidden");
+}
+function closeComposerUI(){
+  composer.classList.add("hidden");
+}
 
 function snap(n){ return Math.round(n / GRID) * GRID; }
 
@@ -33,8 +54,9 @@ function isLinky(text){
   return /(https?:\/\/|www\.|\.com\b|\.net\b|\.org\b|\.io\b|\.gg\b|\.ph\b)/i.test(text);
 }
 
-async function apiGet(){
-  const r = await fetch(`${API}?action=getNotes`);
+// ---------- API helpers ----------
+async function apiGetNotes(){
+  const r = await fetch(`${API}?action=getNotes`, { method: "GET" });
   return r.json();
 }
 
@@ -42,21 +64,13 @@ async function apiPost(payload){
   const r = await fetch(API, {
     method: "POST",
     headers: { "Content-Type":"application/json" },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
   return r.json();
 }
 
-function showPicker(color="yellow"){
-  pickerPreview.style.backgroundImage = `url("${BG(color)}")`;
-  picker.classList.remove("hidden");
-}
-
-function hidePicker(){
-  picker.classList.add("hidden");
-}
-
-function makeStickyEl({id, x, y, color, text, editable}){
+// ---------- Sticky rendering ----------
+function makeStickyEl({ id, x, y, color, text, editable }){
   const el = document.createElement("div");
   el.className = "sticky";
   el.dataset.id = id || "";
@@ -65,10 +79,10 @@ function makeStickyEl({id, x, y, color, text, editable}){
   el.style.backgroundImage = `url("${BG(color)}")`;
 
   const ta = document.createElement("textarea");
-  ta.maxLength = 160;
+  ta.maxLength = MAX_CHARS;
   ta.spellcheck = false;
-  ta.placeholder = editable ? "Write something…" : "";
   ta.value = text || "";
+  ta.placeholder = editable ? "Write something…" : "";
   ta.disabled = !editable;
 
   el.appendChild(ta);
@@ -101,11 +115,17 @@ function enableDrag(el, getId){
       el.style.left = `${p.x}px`;
       el.style.top = `${p.y}px`;
 
-      // Only save position if posted (has id)
+      // Save position only for posted notes (has id)
       const id = getId();
-      if (id) await apiPost({ action:"updatePosition", id, x:p.x, y:p.y });
+      if (id) {
+        try {
+          await apiPost({ action: "updatePosition", id, x: p.x, y: p.y });
+        } catch {
+          showStatus("Couldn’t save position (API issue).", 3500);
+        }
+      }
 
-      // Keep draft coords updated so posting uses the latest
+      // If dragging draft, keep its coordinates updated
       if (draft && el === draft.el) {
         draft.x = p.x;
         draft.y = p.y;
@@ -117,40 +137,59 @@ function enableDrag(el, getId){
   });
 }
 
-function updateDraftUI(){
+// ---------- Draft logic ----------
+function updateDraftControls(){
   if (!draft) return;
   const text = draft.ta.value || "";
-  charCount.textContent = `${text.length} / 160`;
+  charCount.textContent = `${text.length} / ${MAX_CHARS}`;
 
-  const ok = text.trim().length > 0 && text.length <= 160 && !isLinky(text);
+  const ok =
+    text.trim().length > 0 &&
+    text.length <= MAX_CHARS &&
+    !isLinky(text);
+
   postBtn.disabled = !ok;
 }
 
-// Load existing notes
+function removeDraft(){
+  if (draft?.el) draft.el.remove();
+  draft = null;
+  closeComposerUI();
+}
+
+// ---------- Init ----------
 (async function init(){
+  // Load existing notes (and show a friendly status if API blocks)
   try{
-    const data = await apiGet();
-    if (!data.ok) return;
+    const data = await apiGetNotes();
+    if (!data.ok) {
+      showStatus("API is responding, but returned an error.", 5000);
+      return;
+    }
 
     data.notes.forEach(n => {
-      const p = within(Number(n.x||0), Number(n.y||0));
+      const p = within(Number(n.x || 0), Number(n.y || 0));
       const { el } = makeStickyEl({
         id: n.id,
         x: p.x,
         y: p.y,
-        color: n.color || "yellow",
-        text: n.text || "",
+        color: (n.color || "yellow"),
+        text: (n.text || ""),
         editable: false
       });
       enableDrag(el, () => n.id);
     });
   } catch (e){
-    console.error("Init error:", e);
+    // This is where “public access still not right” will show up
+    showStatus("Can’t reach the Google Script API. Check deployment access = Anyone.", 7000);
   }
 })();
 
-// New sticky
+// New Sticky always creates a local draft immediately (no API needed)
 newBtn.addEventListener("click", () => {
+  hideStatus();
+
+  // Remove existing draft if any
   if (draft?.el) draft.el.remove();
 
   const center = within((window.innerWidth - STICKY) / 2, (window.innerHeight - STICKY) / 2);
@@ -163,59 +202,76 @@ newBtn.addEventListener("click", () => {
     editable: true
   });
 
-  draft = { el: created.el, ta: created.ta, x: center.x, y: center.y, color: "yellow", id: "" };
+  draft = {
+    el: created.el,
+    ta: created.ta,
+    x: center.x,
+    y: center.y,
+    color: "yellow",
+    id: ""
+  };
 
-  enableDrag(draft.el, () => draft.id); // draft is draggable too
-  showPicker("yellow");
+  enableDrag(draft.el, () => draft.id);
+  openComposer("yellow");
 
-  draft.ta.addEventListener("input", updateDraftUI);
-  updateDraftUI();
+  draft.ta.addEventListener("input", updateDraftControls);
+  updateDraftControls();
   draft.ta.focus();
 });
 
-// Color picker chips
+// Color chips
 document.querySelectorAll(".chip").forEach(btn => {
   btn.addEventListener("click", () => {
     if (!draft) return;
     const color = btn.dataset.color;
     draft.color = color;
     draft.el.style.backgroundImage = `url("${BG(color)}")`;
-    pickerPreview.style.backgroundImage = `url("${BG(color)}")`;
+    preview.style.backgroundImage = `url("${BG(color)}")`;
   });
 });
 
-// Post button
+// Close composer
+closeComposer.addEventListener("click", removeDraft);
+
+// Post (save to Google Sheets)
 postBtn.addEventListener("click", async () => {
   if (!draft) return;
 
   const text = (draft.ta.value || "").trim();
-  if (!text) return;
 
+  if (!text) {
+    showStatus("Write something first.", 2500);
+    return;
+  }
   if (isLinky(text)) {
-    alert("Links aren’t allowed.");
+    showStatus("Links aren’t allowed.", 3500);
     return;
   }
 
-  const res = await apiPost({
-    action: "addNote",
-    text,
-    color: draft.color,
-    x: draft.x,
-    y: draft.y
-  });
+  try{
+    const res = await apiPost({
+      action: "addNote",
+      text,
+      color: draft.color,
+      x: draft.x,
+      y: draft.y
+    });
 
-  if (!res.ok) {
-    alert(res.error || "Could not save note.");
-    return;
+    if (!res.ok) {
+      showStatus("Couldn’t save note. (Backend rejected it)", 5000);
+      return;
+    }
+
+    // Reload to show the saved note as communal (read-only)
+    location.reload();
+  } catch {
+    showStatus("Couldn’t save note (API access issue). Make deployment access = Anyone.", 7000);
   }
-
-  // simplest: reload to fetch new id + render read-only
-  location.reload();
 });
 
-// Hide picker when clicking outside it (optional)
+// Click outside composer closes it (optional)
 document.addEventListener("mousedown", (e) => {
-  if (picker.classList.contains("hidden")) return;
-  const clickInside = picker.contains(e.target) || newBtn.contains(e.target) || draft?.el?.contains(e.target);
-  if (!clickInside) hidePicker();
+  if (composer.classList.contains("hidden")) return;
+  const clickInside = composer.contains(e.target) || newBtn.contains(e.target) || draft?.el?.contains(e.target);
+  if (!clickInside) closeComposerUI();
 });
