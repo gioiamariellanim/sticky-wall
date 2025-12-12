@@ -1,53 +1,28 @@
 <!doctype html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="utf-8">
   <title>Sticky Wall</title>
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;800&family=Margarine&display=swap" rel="stylesheet">
-
-  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;800&family=Margarine&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <main id="wall">
-    <div id="notesLayer"></div>
 
-    <!-- Status / errors (no DevTools needed) -->
-    <div id="status" class="status hidden"></div>
+<div id="wall"></div>
 
-    <!-- Picker / Composer -->
-    <div id="composer" class="composer hidden" role="dialog" aria-label="New Sticky">
-      <div id="preview" class="preview"></div>
+<div id="picker" class="picker hidden">
+  <div class="chips">
+    <button data-color="yellow"></button>
+    <button data-color="blue"></button>
+    <button data-color="green"></button>
+    <button data-color="pink"></button>
+    <button data-color="gray"></button>
+  </div>
+</div>
 
-      <div class="composerHeader">
-        <div class="composerTitle">New Sticky</div>
-        <button id="closeComposer" class="iconBtn" aria-label="Close">✕</button>
-      </div>
+<button id="newStickyBtn">＋ New Sticky</button>
 
-      <div class="chips">
-        <button class="chip" data-color="yellow" aria-label="Yellow"></button>
-        <button class="chip" data-color="blue" aria-label="Blue"></button>
-        <button class="chip" data-color="green" aria-label="Green"></button>
-        <button class="chip" data-color="pink" aria-label="Pink"></button>
-        <button class="chip" data-color="gray" aria-label="Gray"></button>
-      </div>
-
-      <div class="composerFooter">
-        <div id="charCount" class="charCount">0 / 160</div>
-        <button id="postBtn" class="postBtn" disabled>Post</button>
-      </div>
-    </div>
-
-    <!-- New Sticky button -->
-    <button id="newStickyBtn" class="fab" aria-label="New Sticky">
-      <span class="fabPlus">+</span>
-      <span class="fabLabel">New Sticky</span>
-    </button>
-  </main>
-
-  <script src="app.js"></script>
+<script src="app.js"></script>
 </body>
 </html>
