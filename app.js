@@ -1,4 +1,4 @@
-const API = "PASTE YOUR APPS SCRIPT URL HERE";
+const API = "https://script.google.com/macros/s/AKfycbzUFPOqlRbtS-uExuoM6XsZ7KuDQ70t8y-6OKbnKAuvl6747WdPhtNUCYrtZeN4NKZE6Q/exec";
 
 const wall = document.getElementById("wall");
 const newBtn = document.getElementById("new");
