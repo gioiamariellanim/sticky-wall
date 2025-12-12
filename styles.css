@@ -1,0 +1,41 @@
+body {
+  margin: 0;
+  height: 100vh;
+  background: url("./assets/marble.png") center / cover no-repeat;
+  overflow: hidden;
+}
+
+#wall {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.sticky {
+  position: absolute;
+  width: 151px;
+  height: 151px;
+  cursor: grab;
+}
+
+.sticky textarea {
+  position: absolute;
+  top: 25px;
+  left: 13px;
+  width: 125px;
+  height: 100px;
+  font-family: "Margarine", cursive;
+  font-size: 10px;
+  background: transparent;
+  border: none;
+  resize: none;
+  outline: none;
+}
+
+#new {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 14px 20px;
+}
