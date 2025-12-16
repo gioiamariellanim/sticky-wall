@@ -41,11 +41,7 @@ body{
 .sticky.dragging{
   cursor: grabbing;
   filter: drop-shadow(0 14px 26px rgba(0,0,0,.26));
-  transform: translate3d(0,0,0) rotate(1deg);
-}
-
-.sticky.settle{
-  transition: transform 140ms ease-out;
+  /* IMPORTANT: do NOT set transform here */
 }
 
 .sticky textarea{
@@ -107,7 +103,7 @@ body{
 .chips button[data-color="pink"]{ background:#ffb2c4; }
 .chips button[data-color="gray"]{ background:#d8d8d8; }
 
-/* New Sticky button (smoother) */
+/* New Sticky button (smooth) */
 #newStickyBtn{
   position: fixed;
   bottom: 32px;
